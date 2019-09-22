@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <style media="screen">
+        table {
+            width: 100%;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #bcbcbc;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .in-line {
+
+        }
+
+        input {
+            margin: 0;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            border: none;
+            font-size: 1em;
+            padding-left: 5px;
+            font-style: oblique;
+            display: inline;
+            outline: none;
+            box-sizing: border-box;
+            color: black;
+        }
+
+        input[type=button] {
+            width: 30%;
+            border: none;
+            background-color: lightgray;
+            font-size: 1em;
+            color: #042AaC;
+            outline: none;
+            display: inline;
+            margin-left: -10px;
+            box-sizing: border-box;
+        }
+        input[type='button']:hover {
+            background-color: grey;
+        }
+        ul {
+            padding: 0;
+        }
+
+        li {
+            display: inline-block;
+        }
+    
+    </style>
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        var roomNumber = 2;
+        var key = "1RQOftwtHKWPRShK27VcjWgX9AOUTuRPV63Lm9IJEqRg";
+        var GSSurl = "https://spreadsheets.google.com/feeds/list/" + key + "/" + roomNumber + "/public/basic?alt=json-in-script&callback=?";
+
+        window.onload = function () {
+
+            function roadGrid() {
+
+                $("#grid").empty(); 
+                $("#roomNumberDisplay").empty();
+                $("#roomNumberDisplay").append(roomNumber - 1 + "번 방");
+
+                $.getJSON(GSSurl, function (data) {
+
+                    var entry = data.feed.entry;
+                    var subEndtry;
+
+                    var table = document.createElement("table");
+
+                    for (var i = 0; i < entry.length; i++) {
+
+                        var tr = document.createElement("tr");
+
+                        if (i == 0) {
+                            subEndtry = entry[i].content.$t.split(",");
+                        } else {
+                            subEndtry = entry[i].content.$t.split(":");
+                            subEndtry.shift();
+                        }
+
+                        for (var j = 0; j <= subEndtry.length; j++) {
+
+                            var td = document.createElement("td");
+                            var boxNode;
+                            var textNode;
+                            var pasingTempCellData;
+
+                            if (i == 0 && j == 0) {
+                                boxNode = document.createElement("div");
+                                pasingTempCellData = entry[i].title.$t;
+
+                            } else if (j == 0) {
+                                boxNode = document.createElement("div");
+                                pasingTempCellData = entry[i].title.$t;
+
+                            } else if (i == 0) {
+                                boxNode = document.createElement("div");
+                                pasingTempCellData = subEndtry[j - 1].substring(8);
+
+                            } else if (j == subEndtry.length) {
+                                boxNode = document.createElement("input");
+                                boxNode.type = "checkBox";
+                                pasingTempCellData = subEndtry[j - 1];
+
+                            } else {
+                                boxNode = document.createElement("input");
+                                boxNode.type = "checkBox";
+                                pasingTempCellData = subEndtry[j - 1].slice(0, -8);
+
+                            }
+
+                            pasingTempCellData = pasingTempCellData.trim();
+                            //console.log("[" + pasingTempCellData + "]   i : " + i + "   j : " + j);
+
+                            if (pasingTempCellData == "NULL") {
+                                textNode = document.createTextNode("");
+
+                            } else {
+                                textNode = document.createTextNode(pasingTempCellData);
+                            }
+
+                            boxNode.value = i + "a" + j;
+
+                            td.appendChild(boxNode);
+                            td.appendChild(textNode);
+
+                            tr.appendChild(td);
+                        }
+
+                        table.appendChild(tr);
+                    }
+
+                    //console.log("i : " + i + "  entry t : " + entry[i].content.$t);
+                    document.getElementById('grid').appendChild(table);
+                });
+
+            }
+
+            roadGrid();
+            
+            document.getElementById("input").onclick = function () {
+
+                var playAlert = setInterval(function () {}, 10000);
+
+                var inputTextBoxName = document.getElementById('nameTextBox').value;
+                var checkDateTimeXYString = "";
+
+                inputTextBoxName = inputTextBoxName.trim();
+                if(inputTextBoxName == "") inputTextBoxName = "NULL";
+
+                $("input[type='checkBox']:checked").each(function () {
+
+                    var a = $(this).val().indexOf("a");
+                    var rowsDate = $(this).val().substring(0, a);
+                    var columnsTime = $(this).val().substring(a + 1);
+
+                    checkDateTimeXYString += "d" +
+                        rowsDate + "t" + columnsTime;
+
+                });
+
+                if (checkDateTimeXYString != "") {
+
+
+                    $.ajax({
+
+                        url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
+
+                        data: { NAME: inputTextBoxName, TIME: checkDateTimeXYString, ROOM: roomNumber },
+
+                        type: "POST",
+                        dataType: "text",
+                        success: function (data) {
+
+                            clearInterval(playAlert);
+
+                            var postResponse = JSON.parse(data);
+                            if (postResponse.result == "error") {
+                                $("#grid").empty();
+                                $("#grid").append(postResponse.error);
+
+                            } else {
+
+                                roadGrid();
+                            }
+                        },   
+                        error: function (data) {
+
+                            clearInterval(playAlert);
+                            $("#grid").empty();
+                            $("#grid").append("connect error");
+                        }  
+                    });
+
+                    $("#grid").empty();
+                    $("#grid").append("wating.");
+
+
+                    playAlert = setInterval(function () {
+                        $("#grid").append(".");
+                    }, 100);
+
+                    setTimeout(function () {
+                        clearInterval(playAlert);
+
+                    }, 30000);
+
+                }
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+
+    <ul>
+        <li>
+        <input type="text" value="이름" id="nameTextBox">
+        <input type="button" value="입력" id="input">
+        </li>
+        <li><div id="roomNumberDisplay"></div></li>
+        <li><div id="testDisplay"></div></li>
+    </ul>
+
+    <hr>
+    <p id="grid"></p>
+
+
+</body>
+
+</html>
