@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Trebuchet MS', serif;
+            line-height: 1.6
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #bcbcbc;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        input {
+            margin: 0;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            border: none;
+            font-size: 1em;
+            padding-left: 5px;
+            font-style: oblique;
+            display: inline;
+            outline: none;
+            box-sizing: border-box;
+            color: black;
+        }
+
+        input[type=button] {
+            width: 30%;
+            border: none;
+            background-color: lightgray;
+            font-size: 1em;
+            color: #042AaC;
+            outline: none;
+            display: inline;
+            margin-left: -10px;
+            box-sizing: border-box;
+        }
+
+        input[type='button']:hover {
+            background-color: grey;
+        }
+
+        ul {
+            padding: 0;
+        }
+
+        li {
+            display: inline-block;
+        }
+
+
+
+
+
+        .container {
+            width: 800px;
+            margin: 0 auto;
+        }
+
+        ul.tabs {
+            margin: 0px;
+            padding: 0px;
+            list-style: none;
+        }
+
+        ul.tabs li {
+            background: none;
+            color: #222;
+            display: inline-block;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        ul.tabs li.current {
+            background: #ededed;
+            color: #222;
+        }
+
+        .tab-content {
+            display: none;
+            background: #ededed;
+            padding: 15px;
+        }
+
+        .tab-content.current {
+            display: inherit;
+        }
+
+    </style>
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> -->
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <script type="text/javascript" src="script.js" charset='euc-kr'></script>
+
+    <script type="text/javascript">
+        
+        
+        window.onload = function () {
+
+            $('body').find($('ul.tabs li.tab-link').click(function () {
+                var tab_id = $(this).attr('data-tab');
+
+                $('ul.tabs li').removeClass('current');
+                $('.tab-content').removeClass('current');
+
+                $(this).addClass('current');
+                $("#" + tab_id).addClass('current');
+            }))
+
+            $("input[type='button']").click(function () {
+                var divPosition = $(this).closest('div');
+                var sheetId = divPosition[0].id;
+                var gridId = divPosition.find('p')[0].id;
+                var nameTextBoxId = divPosition.find(':text')[0].id;
+
+                sheetId = sheetId.substr(4);
+
+                submit(sheetId, "#" + gridId, nameTextBoxId);
+            })
+
+            
+        }
+
+
+
+        $(document).ready(function () {
+            roadAllGrid();
+            
+            $('#tab-1').empty();
+        })
+       
+
+    </script>
+
+</head>
+<body>
+
+    <div class="container">
+
+        <ul class="tabs">
+            <li class="tab-link current" data-tab="tab-1">공지</li>
+        </ul>
+
+        <div id="tabBody">
+            <div id="tab-1" class="tab-content current">
+                첫 페이지 탭
+            </div>
+            
+        </div>
+
+    </div><!-- container -->
+</body>
+</html>
