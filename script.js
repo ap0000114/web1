@@ -1,4 +1,4 @@
-function roadGrid(sheetNumber, gridID, roomNumberDisplay) {
+function roadGrid(sheetNumber, gridID, roomNumberDisplay, columnNum) {
 
 
     var key = "1RQOftwtHKWPRShK27VcjWgX9AOUTuRPV63Lm9IJEqRg";
@@ -6,8 +6,8 @@ function roadGrid(sheetNumber, gridID, roomNumberDisplay) {
     var grid = document.getElementById(gridID);
 
     $("#" + gridID).empty();
-    $(roomNumberDisplay).empty();
-    $(roomNumberDisplay).append(sheetNumber - 1 + "번 방");
+    //$(roomNumberDisplay).empty();
+    //$(roomNumberDisplay).append(sheetNumber - 1 + "번 방");
 
     $.getJSON(GSSurl, function (data) {
 
@@ -15,6 +15,8 @@ function roadGrid(sheetNumber, gridID, roomNumberDisplay) {
         var subEndtry;
 
         var table = document.createElement("table");
+
+        
 
         for (var i = 0; i < entry.length; i++) {
 
@@ -27,7 +29,9 @@ function roadGrid(sheetNumber, gridID, roomNumberDisplay) {
                 subEndtry.shift();
             }
 
-            for (var j = 0; j <= subEndtry.length; j++) {
+            if (columnNum > entry.length) columnNum = subEndtry.length;
+
+            for (var j = 0; j <= columnNum; j++) {
 
                 var td = document.createElement("td");
                 var boxNode;
@@ -173,8 +177,8 @@ function submit(roomNumber, gridID, nameTextBoxId) {
     }
 }
 
-function roadAllGrid() {
-
+function roadAllGrid(columnNum) {
+    
     for (var i = 1; i < 9; i++) {
 
         $(".tabs").append($('<li/>', {
@@ -194,25 +198,22 @@ function roadAllGrid() {
 
 
 
-    $("#tabBody div").append($('<ul/>'));
-    $("#tabBody div ul").append($('<li/>', {id: 'text'}));
-    $("#tabBody div ul").append($('<li/>', { id: 'button' }));
-    $("#tabBody div ul").append($('<li/>', { id: 'display' }));
+    $("#tabBody div[name='tabBodyChild']").append($('<ul/>'));
+    $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'text' }));
+    $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'button' }));
+    $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'display' }));
 
-    $("#tabBody div").append($('<hr/>'));
-
-
+    $("#tabBody div[name='tabBodyChild']").append($('<hr/>'));
 
 
 
-
-
-    $("#tabBody div").each(function () {
+    $("#tabBody div[name='tabBodyChild']").each(function () {
         var random = Math.floor(Math.random() * 1000) + 1;
         $(this).append($('<p/>', {
             id: 'grid' + String(random)
         }))
     });
+
 
     $("#tabBody ul li#text").each(function () {
         var random = Math.floor(Math.random() * 1000) + 1;
@@ -267,7 +268,7 @@ function roadAllGrid() {
         console.log("");
         */
 
-        roadGrid(sheetId, gridId, "#" + roomNumDisplayId);
+        roadGrid(sheetId, gridId, "#" + roomNumDisplayId, columnNum);
     });
 }
 
