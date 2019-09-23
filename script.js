@@ -91,7 +91,7 @@ function roadGrid(sheetNumber, gridID, roomNumberDisplay, columnNum) {
 
 }
 
-function submit(roomNumber, gridID, nameTextBoxId) {
+function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
 
     var playAlert = setInterval(function () { }, 10000);
 
@@ -141,14 +141,14 @@ function submit(roomNumber, gridID, nameTextBoxId) {
                 } else {
                     var divPosition = $('#' + document.getElementById(nameTextBoxId).id).closest('div');
                     
-                    console.log(document.getElementById(nameTextBoxId).id);
+                    //console.log(document.getElementById(nameTextBoxId).id);
                     var sheetId = divPosition[0].id;
                     var gridId = divPosition.find('p')[0].id;
                     var roomNumDisplayId = divPosition.find('[name="roomNumberDisplay"]')[0].id;
 
                     sheetId = sheetId.substr(4);
 
-                    roadGrid(sheetId, gridId, "#" + roomNumDisplayId);
+                    roadGrid(sheetId, gridId, "#" + roomNumDisplayId, columnNum);
 
                     //console.log(divPosition);
                 }
