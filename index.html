@@ -4,21 +4,10 @@
 
     <meta charset="UTF-8">
     <style>
-        /*mobile*/
-@media all and (max-width: 640px) {
-     
-    .ui-mobile .ui-page {
-        width: 100%;
-        left: initial;
-    }
-     
-    .sidebar {
-        display : none;
-    }
-}
-
-
-        body {
+        html,body {
+            height:100%;
+            width:100%;
+            overflow: auto;
             font-family: 'Trebuchet MS', serif;
             font-size: 2vw;
             line-height: 3vw;
@@ -122,6 +111,15 @@
     <script type="text/javascript" charset="UTF-8">
 
 
+        $(document).ready(function () {
+
+            submitGridLoadLog();
+            roadAllGrid(5, true);
+            LoadingWithMask('./Wedges.gif');
+            
+        })
+
+
         window.onload = function () {
 
             $('body').find($('ul.tabs li.tab-link').click(function () {
@@ -142,19 +140,14 @@
 
                 sheetId = sheetId.substr(4);
 
+                showLoadingWithMask();
                 submit(sheetId, "#" + gridId, nameTextBoxId, 5);
+                
+
+
             })
 
-
         }
-
-
-
-        $(document).ready(function () {
-            roadAllGrid(5);
-
-            //document.getElementByName("iframe")[0].;
-        })
 
 
     </script>
@@ -172,12 +165,13 @@
             <div id="tab-1" class="tab-content current">
                 첫 페이지 탭
 
-                <iframe src="https://docs.google.com/document/d/e/2PACX-1vSyksQLVS8agt6nhyR_W_rhnTii0-I4eoFLPuVybgRsyJTas-EWwjvwYTnjLF--rI5zTbEAaZ6XP9Wk/pub?embedded=true" width="100%" ></iframe>
+                <iframe src="https://docs.google.com/document/d/e/2PACX-1vSyksQLVS8agt6nhyR_W_rhnTii0-I4eoFLPuVybgRsyJTas-EWwjvwYTnjLF--rI5zTbEAaZ6XP9Wk/pub?embedded=true" width="100%"></iframe>
 
             </div>
-            
+
         </div>
 
     </div><!-- container -->
+    <div id="lastRowVaule" value="" style="width:0vw;height:0vh; display:none"></div>
 </body>
 </html>
