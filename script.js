@@ -92,12 +92,12 @@ function roadGrid(sheetNumber, gridID, roomNumberDisplay, columnNum) {
 }
 
 function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
-
-    var playAlert = setInterval(function () { }, 10000);
-
+    
     var inputTextBoxName = document.getElementById(nameTextBoxId).value;
 
     var checkDateTimeXYString = "";
+
+    var lastRow = document.getElementById("lastRowVaule").value;
 
     inputTextBoxName = inputTextBoxName.trim();
     if (inputTextBoxName == "") inputTextBoxName = "NULL";
@@ -106,146 +106,188 @@ function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
     $(gridID).find("#checkBox:checked").each(function () {
         
         var a = $(this).val().indexOf("a");
-        var rowsDate = $(this).val().substring(0, a);
-        var columnsTime = $(this).val().substring(a + 1);
+        var rowsTime = $(this).val().substring(0, a);
+        var columnsDate = $(this).val().substring(a + 1);
 
         checkDateTimeXYString += "d" +
-            rowsDate + "t" + columnsTime;
-
-        //alert(checkDateTimeXYString);
+            columnsDate + "t" + rowsTime;
 
     });
 
-    //alert("checkDateTimeXYString :" + checkDateTimeXYString);
+    $.ajax({
 
-    if (checkDateTimeXYString != "") {
+        url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
+
+        data: { NAME: lastRow, TIME: checkDateTimeXYString, ROOM: roomNumber, FUNCTION: "checkOtherUserDataOverlap" },
+
+        type: "POST",
+        dataType: "text",
+        success: function (data) {
+
+            var postResponse = JSON.parse(data);
+            if (postResponse.result == "error") {
+
+                $("body").append(postResponse.error);
 
 
-        $.ajax({
+            } else if (postResponse.result == "success") {
 
-            url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
+                if (postResponse.functionResult == "ok") {
+                    console.log(postResponse);
+                    if (checkDateTimeXYString != "" ) {
 
-            data: { NAME: inputTextBoxName, TIME: checkDateTimeXYString, ROOM: roomNumber },
 
-            type: "POST",
-            dataType: "text",
-            success: function (data) {
+                        $.ajax({
 
-                clearInterval(playAlert);
+                            url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
 
-                var postResponse = JSON.parse(data);
-                if (postResponse.result == "error") {
-                    $(gridID).empty();
-                    $(gridID).append(postResponse.error);
+                            data: { NAME: inputTextBoxName, TIME: checkDateTimeXYString, ROOM: roomNumber },
+
+                            type: "POST",
+                            dataType: "text",
+                            success: function (data) {
+
+                                var postResponse = JSON.parse(data);
+                                if (postResponse.result == "error") {
+                                    $("body").empty();
+                                    $("body").append(postResponse.error);
+
+                                } else {
+                                    roadAllGrid(5, false);
+                                    submitGridLoadLog();
+                                    hideLoadingWithMask();
+                                    /*
+                                    var divPosition = $('#' + document.getElementById(nameTextBoxId).id).closest('div');
+
+                                    var sheetId = divPosition[0].id;
+                                    var gridId = divPosition.find('p')[0].id;
+                                    var roomNumDisplayId = divPosition.find('[name="roomNumberDisplay"]')[0].id;
+
+                                    sheetId = sheetId.substr(4);
+
+                                    roadGrid(sheetId, gridId, "#" + roomNumDisplayId, columnNum);
+                                    */
+                                }
+                            },
+                            error: function (data) {
+                                $("body").empty();
+                                $("body").append(postResponse.error);
+                            }
+                        });
+                    }
 
                 } else {
-                    var divPosition = $('#' + document.getElementById(nameTextBoxId).id).closest('div');
+                    var overlapMessage = "";
+
+                    var functionResult = JSON.parse(data).functionResult;
+
+                    var timeSplitArray = functionResult.split("*time*");
+
+                    for (var i = 0; i < timeSplitArray.length - 1; i++) {
+                        
+                        var dateSplitArray = timeSplitArray[i].split("*date*");
+                        var nameSplitArray = dateSplitArray[0].split("*name*");
+
+                        var time = timeSplitArray[i].substr(timeSplitArray[i].indexOf("*date*") + 6); //substr
+                        var date = dateSplitArray[0].substr(timeSplitArray[i].indexOf("*name*") + 6);
+                        var name = nameSplitArray[0];
+
+                        overlapMessage += name + "님이 방금 " + date + " " + time + "에 예약하신것과 겹칩니다! "
+                    }
+
+                    alert(overlapMessage);
+
+                    console.log(data);
                     
-                    //console.log(document.getElementById(nameTextBoxId).id);
-                    var sheetId = divPosition[0].id;
-                    var gridId = divPosition.find('p')[0].id;
-                    var roomNumDisplayId = divPosition.find('[name="roomNumberDisplay"]')[0].id;
+                    roadAllGrid(5, false);
+                    submitGridLoadLog();
+                    hideLoadingWithMask();
 
-                    sheetId = sheetId.substr(4);
-
-                    roadGrid(sheetId, gridId, "#" + roomNumDisplayId, columnNum);
-
-                    //console.log(divPosition);
                 }
-            },
-            error: function (data) {
-
-                clearInterval(playAlert);
-                $(gridID).empty();
-                $(gridID).append("connect error");
             }
-        });
+        },
+        error: function (data) {
 
-        $(gridID).empty();
-        $(gridID).append("wating.");
+            $("body").empty();
+            $("body").append("connect error");
+        }
+    });
 
-
-        playAlert = setInterval(function () {
-            $(gridID).append(".");
-        }, 100);
-
-        setTimeout(function () {
-            clearInterval(playAlert);
-
-        }, 30000);
-
-    }
+    
 }
 
-function roadAllGrid(columnNum) {
+function roadAllGrid(columnNum, isFirst) {
     
-    for (var i = 1; i < 9; i++) {
+    if (isFirst == true) {
 
-        $(".tabs").append($('<li/>', {
-            class: 'tab-link',
-            'data-tab': 'tab-' + String(i + 1),
-            text: i + '번 방'
-        }));
+        for (var i = 1; i < 9; i++) {
+
+            $(".tabs").append($('<li/>', {
+                class: 'tab-link',
+                'data-tab': 'tab-' + String(i + 1),
+                text: i + '번 방'
+            }));
 
 
-        $("#tabBody").append($('<div/>', {
-            id: 'tab-' + String(i + 1),
-            class: 'tab-content',
-            name: 'tabBodyChild'
-        }));
+            $("#tabBody").append($('<div/>', {
+                id: 'tab-' + String(i + 1),
+                class: 'tab-content',
+                name: 'tabBodyChild'
+            }));
+        }
+
+
+
+
+        $("#tabBody div[name='tabBodyChild']").append($('<ul/>'));
+        $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'text' }));
+        $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'button' }));
+        $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'display' }));
+
+        $("#tabBody div[name='tabBodyChild']").append($('<hr/>'));
+
+
+
+        $("#tabBody div[name='tabBodyChild']").each(function () {
+            var random = Math.floor(Math.random() * 1000) + 1;
+            $(this).append($('<p/>', {
+                id: 'grid' + String(random)
+            }))
+        });
+
+
+        $("#tabBody ul li#text").each(function () {
+            var random = Math.floor(Math.random() * 1000) + 1;
+            $(this).append($('<input/>', {
+                type: 'text',
+                value: '이름',
+                id: 'nameTextBox' + String(random)
+            }))
+        });
+        $("#tabBody ul li#button").each(function () {
+            var random = Math.floor(Math.random() * 1000) + 1;
+            $(this).append($('<input/>', {
+                type: 'button',
+                value: '입력',
+                id: 'input' + String(random)
+            }))
+        });
+
+        $("#tabBody ul li#display").each(function () {
+            var random = Math.floor(Math.random() * 1000) + 1;
+            $(this).append($('<div/>', {
+                name: 'roomNumberDisplay',
+                id: 'roomNumberDisplay' + String(random)
+            }))
+        });
+        $("#tabBody ul li#display").each(function () {
+            var random = Math.floor(Math.random() * 1000) + 1;
+            $(this).append($('<div/>', {
+                name: 'testDisplay',
+                id: 'testDisplay' + String(random)
+            }))
+        });
     }
-
-
-
-
-    $("#tabBody div[name='tabBodyChild']").append($('<ul/>'));
-    $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'text' }));
-    $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'button' }));
-    $("#tabBody div[name='tabBodyChild'] ul").append($('<li/>', { id: 'display' }));
-
-    $("#tabBody div[name='tabBodyChild']").append($('<hr/>'));
-
-
-
-    $("#tabBody div[name='tabBodyChild']").each(function () {
-        var random = Math.floor(Math.random() * 1000) + 1;
-        $(this).append($('<p/>', {
-            id: 'grid' + String(random)
-        }))
-    });
-
-
-    $("#tabBody ul li#text").each(function () {
-        var random = Math.floor(Math.random() * 1000) + 1;
-        $(this).append($('<input/>', {
-            type: 'text',
-            value: '이름',
-            id: 'nameTextBox' + String(random)
-        }))
-    });
-    $("#tabBody ul li#button").each(function () {
-        var random = Math.floor(Math.random() * 1000) + 1;
-        $(this).append($('<input/>', {
-            type: 'button',
-            value: '입력',
-            id: 'input' + String(random)
-    }))
-    });
-
-    $("#tabBody ul li#display").each(function () {
-        var random = Math.floor(Math.random() * 1000) + 1;
-        $(this).append($('<div/>', {
-            name : 'roomNumberDisplay',
-            id: 'roomNumberDisplay' + String(random)
-        }))
-    });
-    $("#tabBody ul li#display").each(function () {
-        var random = Math.floor(Math.random() * 1000) + 1;
-        $(this).append($('<div/>', {
-            name: 'testDisplay',
-            id: 'testDisplay' + String(random)
-        }))
-    });
 
     $("#tabBody div[name='tabBodyChild']").each(function () {
         var sheetId = $(this)[0].id;
@@ -270,7 +312,72 @@ function roadAllGrid(columnNum) {
 
         roadGrid(sheetId, gridId, "#" + roomNumDisplayId, columnNum);
     });
+
 }
 
+function submitGridLoadLog() {
+
+    $.ajax({
+
+        url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
+
+        data: { NAME: "load", TIME: "load", ROOM: 0 },
+
+        type: "POST",
+        dataType: "text",
+        success: function (data) {
+
+            var postResponse = JSON.parse(data);
+            if (postResponse.result == "error") {
+
+                $("body").empty();
+                $("body").append(postResponse.error);
+
+
+            } else if (postResponse.result == "success") {
+                document.getElementById("lastRowVaule").value = postResponse.row;
+            }
+        },
+        error: function (data) {
+
+            $("body").empty();
+            $("body").append("connect error");
+        }
+    });
+
+}
+
+function LoadingWithMask(gif) {
+
+    //화면의 높이와 너비를 구합니다.
+    var maskHeight = window.innerHeight || document.body.clientHeight;
+    var maskWidth = window.innerWidth || document.body.clientWidth;
+
+    //화면에 출력할 마스크를 설정해줍니다.
+    var mask = "<div id='mask' style='position:absolute; z-index:9000; background-color:#000000; display:none; left:0; top:0;'><img src='" + gif + "' style='position: absolute; display: block; margin: 0px auto; top:20%;  left:33%; width:30vw; height:30vw;'/></div>";
+
+
+    //화면에 레이어 추가
+    $('body')
+        .append(mask)
+
+    //마스크의 높이와 너비를 화면 것으로 만들어 전체 화면을 채웁니다.
+    $('#mask').css({
+        'width': '100vw',
+        'height': '100vh',
+        'opacity': '0.3'
+    });
+
+    $('#mask').hide();
+}
+
+function showLoadingWithMask() {
+    $('#mask').show();
+}
+
+function hideLoadingWithMask() {
+    $('#mask').hide();
+    //$('#mask').empty();
+}
 
 
