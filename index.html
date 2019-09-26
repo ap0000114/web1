@@ -4,9 +4,9 @@
 
     <meta charset="UTF-8">
     <style>
-        html,body {
-            height:100%;
-            width:100%;
+        html, body {
+            height: 100%;
+            width: 100%;
             overflow: auto;
             font-family: 'Trebuchet MS', serif;
             font-size: 2vw;
@@ -107,16 +107,16 @@
     <!-- <script src="http://code.jquery.com/jquery-latest.min.js"></script> -->
 
     <script type="text/javascript" src="script.js" charset="UTF-8"></script>
-
+    <script type="text/javascript" src="http://jsgetip.appspot.com"></script>
     <script type="text/javascript" charset="UTF-8">
 
 
         $(document).ready(function () {
 
-            submitGridLoadLog();
+            submitGridLoadLog(ip());
             roadAllGrid(5, true);
             LoadingWithMask('./Wedges.gif');
-            
+
         })
 
 
@@ -141,8 +141,8 @@
                 sheetId = sheetId.substr(4);
 
                 showLoadingWithMask();
-                submit(sheetId, "#" + gridId, nameTextBoxId, 5);
-                
+                submit(sheetId, "#" + gridId, nameTextBoxId, 5, ip());
+
 
 
             })
