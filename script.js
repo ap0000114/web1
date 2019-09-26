@@ -91,7 +91,7 @@ function roadGrid(sheetNumber, gridID, roomNumberDisplay, columnNum) {
 
 }
 
-function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
+function submit(roomNumber, gridID, nameTextBoxId, columnNum, ip) {
     
     var inputTextBoxName = document.getElementById(nameTextBoxId).value;
 
@@ -141,7 +141,7 @@ function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
 
                             url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
 
-                            data: { NAME: inputTextBoxName, TIME: checkDateTimeXYString, ROOM: roomNumber },
+                            data: { NAME: inputTextBoxName, TIME: checkDateTimeXYString, ROOM: roomNumber, FUNCTION: "submit" },
 
                             type: "POST",
                             dataType: "text",
@@ -154,7 +154,7 @@ function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
 
                                 } else {
                                     roadAllGrid(5, false);
-                                    submitGridLoadLog();
+                                    submitGridLoadLog(ip);
                                     hideLoadingWithMask();
                                     /*
                                     var divPosition = $('#' + document.getElementById(nameTextBoxId).id).closest('div');
@@ -200,7 +200,7 @@ function submit(roomNumber, gridID, nameTextBoxId, columnNum) {
                     console.log(data);
                     
                     roadAllGrid(5, false);
-                    submitGridLoadLog();
+                    submitGridLoadLog(ip);
                     hideLoadingWithMask();
 
                 }
@@ -315,13 +315,13 @@ function roadAllGrid(columnNum, isFirst) {
 
 }
 
-function submitGridLoadLog() {
+function submitGridLoadLog(ip) {
 
     $.ajax({
 
         url: "https://script.google.com/macros/s/AKfycbyyv9c9rdm8fNudFl0LNkN-IPgI9ESulmPOv0R1jjj5AmhDmy8/exec",
 
-        data: { NAME: "load", TIME: "load", ROOM: 0 },
+        data: { NAME: ip, TIME: "load", ROOM: 0 ,FUNCTION: "load"},
 
         type: "POST",
         dataType: "text",
@@ -379,5 +379,4 @@ function hideLoadingWithMask() {
     $('#mask').hide();
     //$('#mask').empty();
 }
-
 
