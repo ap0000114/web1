@@ -11,8 +11,8 @@
             width: 100%;
             overflow: auto;
             font-family: 'Trebuchet MS', serif;
-            font-size: 0.5vw;
-            line-height: 1vw;
+            font-size: 1vw;
+            line-height: 1vh;
         }
 
         table {
@@ -86,15 +86,22 @@
                 display: inline-block;
                 padding: 1vw 2vh;
                 cursor: pointer;
-                text-align: center; 
+
             }
 
                 ul.tabs li.current {
                     background: #ededed;
                     color: #222;
-                    text-align: center; 
                 }
 
+        .tab-link.current {
+
+            text-align: center; 
+        }
+        .tab-link {
+
+            text-align: center; 
+        }
         .tab-content {
             display: none;
             background: #ededed;
